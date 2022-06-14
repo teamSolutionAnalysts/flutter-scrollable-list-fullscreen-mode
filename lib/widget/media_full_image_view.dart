@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+
+import '../model/arguments_model.dart';
 
 /// Using this widget you can click on image which will open fullscreen with
 /// horizontal scrollable images and close icon.
@@ -8,23 +11,26 @@ import 'package:photo_view/photo_view_gallery.dart';
 /// showImageIndex : Index of tapped image
 
 class MediaFullImageView extends StatefulWidget {
-  final List<String> mediaItems;
-  final int showImageIndex;
-  const MediaFullImageView({this.showImageIndex, this.mediaItems});
+  const MediaFullImageView({Key? key}) : super(key: key);
 
   @override
   _MediaFullImageViewState createState() => _MediaFullImageViewState();
 }
 
 class _MediaFullImageViewState extends State<MediaFullImageView> {
-  PageController _pageController;
-  final ValueNotifier<int> _currentPage = ValueNotifier<int>(null);
+  PageController? _pageController;
+  final ValueNotifier<int?> _currentPage = ValueNotifier<int?>(null);
+  ArgumentsModel? args;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.showImageIndex);
-    _currentPage.value = widget.showImageIndex;
+    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+      args = ModalRoute.of(context)!.settings.arguments as ArgumentsModel;
+      _pageController = PageController(initialPage: args!.imageIndex);
+      _currentPage.value = args?.imageIndex;
+      setState(() {});
+    });
   }
 
   @override
@@ -33,40 +39,44 @@ class _MediaFullImageViewState extends State<MediaFullImageView> {
       body: ValueListenableBuilder(
           valueListenable: _currentPage,
           builder: (context, page, _) {
-            return Stack(
-              children: [
-                _photoView(context),
-                if (page != 0) _previousButton(context),
-                if (!(page == widget.mediaItems.length - 1))
-                  _nextButton(context),
-                _closeButton(context)
-              ],
-            );
+            return args != null
+                ? Stack(
+                    children: [
+                      _photoView(context),
+                      if (page != 0) _previousButton(context),
+                      if (!(page == args!.mediaItems.length - 1))
+                        _nextButton(context),
+                      _closeButton(context)
+                    ],
+                  )
+                : const SizedBox();
           }),
     );
   }
 
-  Widget _photoView(BuildContext context) => PhotoViewGallery.builder(
-        pageController: _pageController,
-        scrollDirection: Axis.horizontal,
-        scrollPhysics: const BouncingScrollPhysics(),
-        onPageChanged: (page) {
-          _currentPage.value = page;
-        },
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(widget.mediaItems[index]),
-          );
-        },
-        itemCount: widget.mediaItems.length,
-      );
+  Widget _photoView(BuildContext context) => _pageController != null
+      ? PhotoViewGallery.builder(
+          pageController: _pageController,
+          scrollDirection: Axis.horizontal,
+          scrollPhysics: const BouncingScrollPhysics(),
+          onPageChanged: (page) {
+            _currentPage.value = page;
+          },
+          builder: (context, index) {
+            return PhotoViewGalleryPageOptions(
+              imageProvider: NetworkImage(args!.mediaItems[index]),
+            );
+          },
+          itemCount: args!.mediaItems.length,
+        )
+      : const CircularProgressIndicator();
 
   Widget _previousButton(BuildContext context) => Positioned(
         top: 0,
         bottom: 0,
         child: GestureDetector(
           onTap: () async {
-            _pageController.previousPage(
+            _pageController?.previousPage(
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeIn);
           },
@@ -90,7 +100,7 @@ class _MediaFullImageViewState extends State<MediaFullImageView> {
         right: 0,
         child: GestureDetector(
           onTap: () {
-            _pageController.nextPage(
+            _pageController?.nextPage(
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeIn);
           },

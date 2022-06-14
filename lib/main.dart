@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'lib/ui/home_page.dart';
-import 'lib/widget/media_full_image_view.dart';
+
+import 'ui/home_page.dart';
+import 'widget/media_full_image_view.dart';
 
 void main() {
   runApp(const MyHomePage());

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'lib/widget/media_full_image_view.dart';
-import 'lib/widget/custom_view_listing.dart';
+
+import '../model/arguments_model.dart';
+import '../widget/custom_listing_view.dart';
 
 ///Home Page for Custom Listing View
 
@@ -23,7 +24,7 @@ class HomePage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          CustomViewListing(
+          CustomListingView(
             crossAxisCount: 1,
             listOfImages: _listOfPictures,
             cancelColor: Colors.white,
@@ -41,7 +42,7 @@ class HomePage extends StatelessWidget {
     Navigator.pushNamed(
       context,
       '/routeFullImage',
-      arguments: Arguments(pos, _listOfPictures),
+      arguments: ArgumentsModel(pos, _listOfPictures),
     );
   }
 }

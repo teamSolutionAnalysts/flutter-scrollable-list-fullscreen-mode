@@ -15,11 +15,11 @@ class CustomListingView extends StatelessWidget {
   final Axis direction;
   final List<String> listOfImages;
   final Color cancelColor;
-  final Function onImageTap;
+  final Function? onImageTap;
   const CustomListingView(
-      {Key key,
-      @required this.crossAxisCount,
-      @required this.listOfImages,
+      {Key? key,
+      required this.crossAxisCount,
+      required this.listOfImages,
       this.direction = Axis.vertical,
       this.cancelColor = Colors.white,
       this.onImageTap})
@@ -51,10 +51,10 @@ class CustomListingView extends StatelessWidget {
         ),
       );
 
-  Widget _itemView(BuildContext context, int index, BoxFit boxFit) =>
+  Widget _itemView(BuildContext context, int index, BoxFit? boxFit) =>
       GestureDetector(
         onTap: () {
-          onImageTap(index);
+          onImageTap!(index);
         },
         child: Stack(
           children: [
